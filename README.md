@@ -1,8 +1,6 @@
 ---
+  ![Process Diagram](https://github.com/Gr3ytrac3/Guard-Mount---External-Peripheral-Scanner/blob/b5dbbb53f08e5192246df2ff8e7643b0ae4676ab/guard-mount.png)
 
-<p align="center">
-  <img src="https://i.imgur.com/YOUR_LOGO.png" alt="USB Guardian Logo" width="120"/>
-</p>
 
 <h1 align="center">
   🛡️ USB Guardian
