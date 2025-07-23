@@ -185,9 +185,5 @@ Contributions welcome! Whether you're submitting a pull request, improving detec
 
 ---
 
-## 📜 License
-
-This project is licensed under the [MIT License](LICENSE).
-
 > “The most dangerous payloads are the ones you never see — until they run.”
 > — *Guard Mount*
