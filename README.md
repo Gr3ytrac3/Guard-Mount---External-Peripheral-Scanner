@@ -3,7 +3,7 @@
 
 
 <h1 align="center">
-  🛡️ USB Guardian
+  🛡️ Guard Mount
 </h1>
 <h4 align="center">
   Real-Time USB Threat Detection, Isolation & Authorization for Linux
