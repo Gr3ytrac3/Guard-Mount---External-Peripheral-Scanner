@@ -167,7 +167,7 @@ Contributions welcome! Whether you're submitting a pull request, improving detec
 
 ---
 
-## 🧠 Ideas for Future Features
+## Ideas for Future Features
 
 * GUI interface (GTK or Electron)
 * Integration with VirusTotal or hybrid-analysis
@@ -177,7 +177,7 @@ Contributions welcome! Whether you're submitting a pull request, improving detec
 
 ---
 
-## ✒️ Author
+## Author
 
 **RedKernel**
 💻 Offensive Security Artisan & Kernel Security Engineer
