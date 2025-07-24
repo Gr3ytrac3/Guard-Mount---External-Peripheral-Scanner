@@ -110,7 +110,7 @@ pip install -r requirements.txt
 ## ▶️ Running USB Guardian
 
 ```bash
-sudo python3 usb_guardian/main.py
+sudo python3 guard-mount/main.py
 ```
 
 USB Guardian will now watch for inserted USB drives and immediately begin analysis.
@@ -121,18 +121,18 @@ USB Guardian will now watch for inserted USB drives and immediately begin analys
 
 ```bash
 # Copy service file
-sudo cp system/usb_guardian.service /etc/systemd/system/
+sudo cp system/guard-mount.service /etc/systemd/system/
 
 # Enable and start the service
 sudo systemctl daemon-reexec
-sudo systemctl enable usb_guardian
-sudo systemctl start usb_guardian
+sudo systemctl enable guard-mount
+sudo systemctl start guard-mount
 ```
 
 Check status:
 
 ```bash
-sudo systemctl status usb_guardian
+sudo systemctl status guard-mount
 ```
 
 ---
@@ -140,8 +140,8 @@ sudo systemctl status usb_guardian
 ## 📁 Project Structure
 
 ```plaintext
-usb_guardian/
-├── usb_guardian/               ← Core Python modules
+Guard Mount - External Peripheral Scanner/
+├── guard-mount/               ← Core Python modules
 │   ├── detector.py             ← USB event monitor
 │   ├── scanner.py              ← File/malware scanner
 │   ├── reporter.py             ← Threat report & CLI UI
@@ -151,7 +151,7 @@ usb_guardian/
 │
 ├── config/                     ← Rule sets & settings
 ├── logs/                       ← Scan & runtime logs
-├── system/usb_guardian.service← systemd integration
+├── system/guard-mount.service← systemd integration
 ├── assets/logo.txt             ← ASCII art (for fun)
 ├── requirements.txt            ← Python packages
 └── README.md                   ← You’re here
@@ -167,7 +167,7 @@ Contributions welcome! Whether you're submitting a pull request, improving detec
 
 ## Ideas for Future Features
 
-* GUI interface (GTK or Electron)
+* GUI interface
 * Integration with VirusTotal or hybrid-analysis
 * Threat classification DB
 * USB sandboxing (via firejail or QEMU)
