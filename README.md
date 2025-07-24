@@ -151,7 +151,7 @@ Guard Mount - External Peripheral Scanner/
 │
 ├── config/                     ← Rule sets & settings
 ├── logs/                       ← Scan & runtime logs
-├── system/guard-mount.service← systemd integration
+├── system/guard-mount.service  ← systemd integration
 ├── assets/logo.txt             ← ASCII art (for fun)
 ├── requirements.txt            ← Python packages
 └── README.md                   ← You’re here
