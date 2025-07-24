@@ -179,7 +179,6 @@ Contributions welcome! Whether you're submitting a pull request, improving detec
 
 **RedKernel**
 💻 Offensive Security Artisan & Kernel Security Engineer
-📫 GitHub: [github.com/YOUR\_HANDLE](https://github.com/Gr3ytrac3)
 
 ---
 
