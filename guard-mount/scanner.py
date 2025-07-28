@@ -68,12 +68,12 @@ def calculate_entropy(file_path):
     entropy = -sum((data.count(byte) / len(data)) * (data.count(byte) / len(data)).bit_length() for byte in set(data))
     return entropy
 
-def heuristic_scan(mount_path):
+def heuristic_scan():
     suspicious_files = []
     autorun_detected = False
     total_files = 0
 
-    for root, dirs, files in os.walk(mount_path):
+    for root, dirs, files in os.walk(MOUNT_DIR):
         for file in files:
             total_files += 1
             file_path = os.path.join(root, file)
