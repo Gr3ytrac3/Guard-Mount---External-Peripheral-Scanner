@@ -1,53 +1,76 @@
 ---
-  ![Process Diagram](https://github.com/Gr3ytrac3/Guard-Mount---External-Peripheral-Scanner/blob/b5dbbb53f08e5192246df2ff8e7643b0ae4676ab/guard-mount.png)
 
+![Process Diagram](https://github.com/Gr3ytrac3/Guard-Mount---External-Peripheral-Scanner/blob/b5dbbb53f08e5192246df2ff8e7643b0ae4676ab/guard-mount.png)
 
 <h1 align="center">
-  🛡️ Guard Mount
+  🛡️ GuardMount
 </h1>
 <h4 align="center">
-  Real-Time USB Threat Detection, Isolation & Authorization for Linux
+  Kernel-Level External Device Interception & Threat Gatekeeper for Linux
 </h4>
 
 <p align="center">
-  <code>RedKernel</code> • <code>Linux Security</code> • <code>Malware Prevention</code> • <code>Red Team Defense</code>
+  <code>RedKernel</code> • <code>Kernel Security</code> • <code>Pre-Mount Threat Interception</code> • <code>Advanced Red Team Defense</code>
 </p>
 
 ---
 
-## 🔍 What is Guard Mount?
+## 🔍 What is GuardMount?
 
-**Guard Mount** is a Linux-based real-time USB device monitor and malware scanner that detects, analyzes, and controls access to external peripherals (USBs, HDDs). It automatically scans newly inserted storage devices **before they mount**, checks for malicious or suspicious content (e.g. Rubber Ducky payloads, autorun scripts, hidden executables), and **requires sudo permission** before granting access.
+**GuardMount** is a next-generation Linux security tool that intercepts all external peripheral devices (USBs, HDDs, BadUSB devices) **at the kernel level before they can mount**, scans their content for malicious payloads, and **requires explicit user authorization to proceed**.
 
----
-
-## Features
-
-✅ **Live USB Device Detection**  
-✅ **Auto-Mount Blocker**  
-✅ **Malware Scanning using ClamAV**  
-✅ **Detection of Suspicious Scripts, Macros & Hidden Files**  
-✅ **Rubber Ducky/BadUSB Identification (HID + Storage Check)**  
-✅ **Terminal-based Threat Report with User Choice**  
-✅ **Sudo Prompt Before Device is Allowed to Mount**  
-✅ **Can Quarantine, Clean, Eject or Reject Devices**  
-✅ **Systemd Integration for Background Monitoring**
+Unlike traditional USB scanners that react **after** the device mounts, **GuardMount acts as a gatekeeper, blocking auto-mount events through custom UDEV rules**. It ensures that no device touches your filesystem without passing an in-depth threat analysis — effectively eliminating split-second payload execution vectors.
 
 ---
 
-## Example Terminal Output
+## 🚫 Why Pre-Mount Interception Matters
+
+Modern attack vectors (BadUSB, Rubber Ducky payloads, autorun scripts) can exploit devices **the moment they are mounted**. A fraction of a second is enough to:
+
+* Trigger silent autorun scripts
+* Inject malicious HID commands
+* Execute stealthy firmware payloads
+
+GuardMount stops this by:
+
+* **Intercepting kernel mount events (via UDEV control)**
+* Scanning the device **before** the system interacts with it
+* Giving you the final say to allow, deny, or quarantine the device
+
+---
+
+## 🔐 Core Features
+
+✅ **Kernel-Level Device Interception (UDEV Rule Integration)**
+
+✅ **Blocks Auto-Mount Until Scan & Authorization**
+
+✅ **Rubber Ducky & HID Attack Prevention**
+
+✅ **Full Content Analysis using ClamAV + Heuristic Rules**
+
+✅ **Persistent Device Fingerprinting (Serial, VID/PID Check)**
+
+✅ **Terminal-Based Threat Report & User Prompt**
+
+✅ **Mount Devices Only After Approval (Read-Only Mode by Default)**
+
+✅ **Systemd Integration for Persistent Background Monitoring**
+
+---
+
+## 🖥️ Example Terminal Flow
 
 ```
-
-─────────────────────────────────────────────
-🛡️  Guard Mount - Threat Report
-─────────────────────────────────────────────
+───────────────────────────────────────────────────────────────────────
+🛡️  GuardMount - Threat Gatekeeper
+───────────────────────────────────────────────────────────────────────
 📅 Date: Wed, 23 Jul 2025 — 18:22:41
 📂 Device: /dev/sdb1 (Kingston USB Drive)
 🔍 Scan Status: COMPLETED
 🧠 Device Classification: Suspicious Storage Device
 
-─────────────────────────────────────────────
+───────────────────────────────────────────────────────────────────────
 🔬 SCAN RESULTS:
 
 ✅ Clean Files: 83
@@ -56,64 +79,76 @@
 
 ☠️ MALICIOUS FILES DETECTED:
 
-\[1] /mnt/usb/hidden/.backdoor.sh            (Trojan.Shell.Backdoor)
-\[2] /mnt/usb/docs/tax\_return\_2025.pdf.exe   (Worm.AutoExec.Dropper)
-\[3] /mnt/usb/system/autorun.inf             (Malicious AutoRun Script)
+ [1] /media/usb/hidden/.backdoor.sh            (Trojan.Shell.Backdoor)
+ [2] /media/usb/docs/tax_return_2025.pdf.exe   (Worm.AutoExec.Dropper)
+ [3] /media/usb/system/autorun.inf             (Malicious AutoRun Script)
 
 ⚠️ SUSPICIOUS FILES:
 
-\[1] /mnt/usb/macro/invoice.docm             (Macro-Enabled Document)
-\[2] /mnt/usb/bin/hidden\_payload             (High Entropy Binary)
+ [1] /media/usb/macro/invoice.docm             (Macro-Enabled Document)
+ [2] /media/usb/bin/hidden_payload             (High Entropy Binary)
 
-─────────────────────────────────────────────
-🛑 Auto-Mount Blocked.
+───────────────────────────────────────────────────────────────────────
+🛑 Auto-Mount Intercepted.
 
-🔐 Please authenticate to proceed.
+🔐 Authenticate to Proceed.
 
 Choose an action:
-\[1] Allow Access (read-only)
-\[2] Clean and Mount
-\[3] Quarantine Entire Drive
-\[4] Eject Device
+ [1] Allow Access (read-only)
+ [2] Clean and Mount
+ [3] Quarantine Entire Drive
+ [4] Eject Device
 
-````
+```
 
 ---
 
-## 📦 Installation
+## 📦 Installation & Setup
 
-### 🔧 Requirements
+### Requirements
 
-- Python 3.8+
-- Linux (Ubuntu, Kali, Arch, etc.)
-- [ClamAV](https://www.clamav.net/) antivirus engine
-- Required Python packages:
-  - `pyudev`, `psutil`, `clamd`, `rich`, `colorama`
+* Python 3.8+
+* Linux (Ubuntu, Kali, Arch, etc.)
+* [ClamAV](https://www.clamav.net/)
+* Python Packages:
 
-### 🧪 Setup Instructions
+  * `pyudev`, `psutil`, `clamd`, `rich`, `colorama`
+
+### Installation Steps
 
 ```bash
 # Install ClamAV
 sudo apt install clamav clamav-daemon -y
 sudo freshclam  # Update virus definitions
 
-# Clone the repo
-git clone https://Gr3ytrac3/Guard-Mount---External-Peripheral-Scanner.git
+# Clone GuardMount Repository
+git clone https://github.com/Gr3ytrac3/Guard-Mount---External-Peripheral-Scanner.git
 cd guard-mount
 
 # Install Python dependencies
 pip install -r requirements.txt
-````
+```
+
+### ⚡ UDEV Lockdown Setup
+
+```bash
+# Copy GuardMount's UDEV rule to block automount for USB storage
+sudo cp system/99-guardmount.rules /etc/udev/rules.d/
+
+# Reload UDEV rules
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
 
 ---
 
-## ▶️ Running USB Guardian
+## ▶️ Running GuardMount
 
 ```bash
 sudo python3 guard-mount/main.py
 ```
 
-USB Guardian will now watch for inserted USB drives and immediately begin analysis.
+GuardMount will now control all external storage devices — detecting, scanning, and authorizing them **before they reach your system**.
 
 ---
 
@@ -140,38 +175,40 @@ sudo systemctl status guard-mount
 ## 📁 Project Structure
 
 ```plaintext
-Guard Mount - External Peripheral Scanner/
-├── guard-mount/               ← Core Python modules
-│   ├── detector.py             ← USB event monitor
-│   ├── scanner.py              ← File/malware scanner
-│   ├── reporter.py             ← Threat report & CLI UI
-│   ├── isolator.py             ← Mount control
-│   ├── authorizer.py           ← Sudo handling
-│   └── main.py                 ← Entry point
+GuardMount - External Peripheral Scanner/
+├── guard-mount/               ← Core Python Modules
+│   ├── detector.py             ← USB Event Monitor
+│   ├── scanner.py              ← File/Malware Scanner
+│   ├── reporter.py             ← CLI Threat Report UI
+│   ├── isolator.py             ← Mount Controller (Pre-Mount)
+│   ├── authorizer.py           ← Sudo Handling & Permissions
+│   └── main.py                 ← Entry Point
 │
-├── config/                     ← Rule sets & settings
-├── logs/                       ← Scan & runtime logs
-├── system/guard-mount.service  ← systemd integration
-├── assets/logo.txt             ← ASCII art (for fun)
-├── requirements.txt            ← Python packages
+├── config/                     ← Heuristics & Detection Rules
+├── system/
+│   ├── 99-guardmount.rules     ← UDEV Auto-Mount Blocker
+│   └── guard-mount.service     ← systemd Service File
+├── logs/                       ← Scan & Runtime Logs
+├── assets/logo.txt             ← ASCII Art Logo
+├── requirements.txt            ← Python Packages
 └── README.md                   ← You’re here
 ```
 
 ---
 
-## 🤝 Contributing
+## 🚀 Future Enhancements
 
-Contributions welcome! Whether you're submitting a pull request, improving detection heuristics, or creating a GUI wrapper — you’re helping improve Linux USB security.
+* Kernel Threat Simulator Mode
+* USB Firmware Analyzer
+* Live SIEM Upload Support
+* Kernel-Level Device Sandbox
+* Zero-Day Payload Detection Heuristics
 
 ---
 
-## Ideas for Future Features
+## 🤝 Contributing
 
-* GUI interface
-* Integration with VirusTotal or hybrid-analysis
-* Threat classification DB
-* USB sandboxing (via firejail or QEMU)
-* Audit log uploader (SIEM support)
+Pull Requests, Feedback, and Feature Suggestions are welcome. Join in refining a tool that can redefine how Linux handles USB security.
 
 ---
 
@@ -180,7 +217,13 @@ Contributions welcome! Whether you're submitting a pull request, improving detec
 **RedKernel**
 💻 Offensive Security Artisan & Kernel Security Engineer
 
+> “Devices don’t earn trust by being plugged in. They earn trust by surviving scrutiny.”
+> — *GuardMount Sentinel Philosophy*
+
 ---
 
-> “The most dangerous payloads are the ones you never see — until they run.”
-> — *Guard Mount*
+## 🧱 Disclaimer
+
+GuardMount is designed for educational and professional security purposes. Unauthorized usage on systems you don’t own or have permission to protect is prohibited.
+
+---
