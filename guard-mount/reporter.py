@@ -1,88 +1,86 @@
-# scan_report.py
+from rich.console import Console
+from rich.table import Table
+from rich.prompt import Prompt
+import subprocess
 
-import datetime
-import textwrap
+console = Console()
 
-# Simulated scan data (replace with real data later)
-scan_result = {
-    "device": "/dev/sdb1",
-    "label": "Kingston USB Drive",
-    "malicious": [
-        { "path": "/mnt/usb/hidden/.backdoor.sh", "threat": "Trojan.Shell.Backdoor" },
-        { "path": "/mnt/usb/docs/tax_return_2025.pdf.exe", "threat": "Worm.AutoExec.Dropper" },
-        { "path": "/mnt/usb/system/autorun.inf", "threat": "Malicious AutoRun Script" }
-    ],
-    "suspicious": [
-        { "path": "/mnt/usb/macro/invoice.docm", "reason": "Macro-Enabled Document" },
-        { "path": "/mnt/usb/bin/hidden_payload", "reason": "High Entropy Binary" }
-    ],
-    "clean_count": 83
-}
 
-def print_header():
-    print("─" * 50)
-    print("      🛡️  Guard Mount - Threat Report")
-    print("─" * 50)
-    print(f"📅 Date: {datetime.datetime.now().strftime('%a, %d %b %Y — %H:%M:%S')}")
-    print(f"📂 Device: {scan_result['device']} ({scan_result['label']})")
-    print("🔍 Scan Status: COMPLETED")
-    print("🧠 Device Classification: Suspicious Storage Device")
-    print()
+def display_report(scan_summary):
+    console.rule("[bold red]USB Guardian - Threat Report[/bold red]")
 
-def print_results():
-    print("─" * 50)
-    print("🔬 SCAN RESULTS:")
-    print()
-    print(f"✅ Clean Files: {scan_result['clean_count']}")
-    print(f"⚠️ Suspicious Files: {len(scan_result['suspicious'])}")
-    print(f"☠️ Malicious Files: {len(scan_result['malicious'])}")
-    print()
+    console.print(f"[bold cyan]Device:[/bold cyan] {scan_summary['device']}")
+    console.print(f"[bold green]Clean Files:[/bold green] {scan_summary['clean_count']}")
+    console.print(f"[bold yellow]Suspicious Files:[/bold yellow] {len(scan_summary['suspicious'])}")
+    console.print(f"[bold red]Malicious Files:[/bold red] {len(scan_summary['malicious'])}")
 
-    print("─" * 50)
-    print("☠️ MALICIOUS FILES DETECTED:")
-    print()
-    for i, item in enumerate(scan_result['malicious'], 1):
-        print(f"  [{i}] {item['path']:<50} ({item['threat']})")
-    print()
+    # Malicious Files Table
+    if scan_summary['malicious']:
+        console.print("\n[bold red]Malicious Files Detected:[/bold red]")
+        table = Table(show_header=True, header_style="bold red")
+        table.add_column("Path", style="dim", width=70)
+        table.add_column("Threat")
 
-    print("⚠️ SUSPICIOUS FILES:")
-    print()
-    for i, item in enumerate(scan_result['suspicious'], 1):
-        print(f"  [{i}] {item['path']:<50} ({item['reason']})")
-    print()
+        for entry in scan_summary['malicious']:
+            table.add_row(entry['path'], entry['threat'])
+        console.print(table)
 
-def prompt_user():
-    print("─" * 50)
-    print("🛑 Auto-Mount Blocked.\n")
-    print("🔐 Please authenticate to proceed.\n")
-    print("Choose an action:")
-    print("  [1] Allow Access (mount as read-only)")
-    print("  [2] Clean and Mount (remove malicious files)")
-    print("  [3] Quarantine Entire Drive")
-    print("  [4] Eject Device")
-    print("  [5] View Full Report")
+    # Suspicious Files Table
+    if scan_summary['suspicious']:
+        console.print("\n[bold yellow]Suspicious Files Detected:[/bold yellow]")
+        table = Table(show_header=True, header_style="bold yellow")
+        table.add_column("Path", style="dim", width=70)
+        table.add_column("Reason")
 
-    choice = input("\n👉 Your choice: ").strip()
-    return choice
+        for entry in scan_summary['suspicious']:
+            table.add_row(entry['path'], entry['reason'])
+        console.print(table)
 
-def main():
-    print_header()
-    print_results()
-    user_choice = prompt_user()
+    # Action Prompt
+    console.print("\n[bold]Choose an action:[/bold]")
+    console.print(" [1] Allow Access (Read-Only Mode)")
+    console.print(" [2] Quarantine Malicious Files")
+    console.print(" [3] Eject Device Immediately")
 
-    print("\nYou selected:", user_choice)
-    if user_choice == "1":
-        print("🔓 Mounting device as read-only...")
-    elif user_choice == "2":
-        print("🧹 Cleaning and mounting device...")
-    elif user_choice == "3":
-        print("📦 Quarantining device...")
-    elif user_choice == "4":
-        print("🔌 Ejecting device...")
-    elif user_choice == "5":
-        print("📄 Displaying full report... (not implemented)")
-    else:
-        print("❌ Invalid option.")
+    action = Prompt.ask("\nEnter choice", choices=["1", "2", "3"], default="3")
+
+    # Handle Actions
+    if action == "1":
+        authenticate_user()
+        console.print("[bold green]Device access granted in Read-Only Mode.[/bold green]")
+        # Here, you would mount the device for user access
+    elif action == "2":
+        authenticate_user()
+        console.print("[bold yellow]Quarantining malicious files...[/bold yellow]")
+        # You can add logic to isolate/delete files here
+    elif action == "3":
+        console.print("[bold red]Ejecting device...[/bold red]")
+        eject_device(scan_summary['device'])
+
+
+def authenticate_user():
+    console.print("\n[bold cyan]Sudo authentication required to proceed.[/bold cyan]")
+    try:
+        subprocess.run(["sudo", "-v"], check=True)
+        console.print("[bold green]Authentication successful.[/bold green]")
+    except subprocess.CalledProcessError:
+        console.print("[bold red]Authentication failed. Action aborted.[/bold red]")
+
+
+def eject_device(device_node):
+    try:
+        subprocess.run(["udisksctl", "power-off", "-b", device_node], check=True)
+        console.print("[bold green]Device ejected safely.[/bold green]")
+    except subprocess.CalledProcessError:
+        console.print("[bold red]Failed to eject device. You can manually remove it.[/bold red]")
+
 
 if __name__ == "__main__":
-    main()
+    # Test mock data
+    sample_summary = {
+        'device': '/dev/sdb1',
+        'clean_count': 100,
+        'malicious': [{'path': '/mnt/usb_guardian/badfile.exe', 'threat': 'Trojan.Agent.Generic'}],
+        'suspicious': [{'path': '/mnt/usb_guardian/.hidden_payload', 'reason': 'Hidden File'}]
+    }
+    display_report(sample_summary)
