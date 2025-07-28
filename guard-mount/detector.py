@@ -1,7 +1,7 @@
 import pyudev
-import time
 import subprocess
-
+from scanner import scan_device
+from reporter import display_report
 
 def get_device_info(device):
     props = device.properties
@@ -19,26 +19,16 @@ def get_device_info(device):
         'bus': bus
     }
 
-
 def is_usb_storage_device(device):
     props = device.properties
 
-    # Check multiple conditions for USB storage devices
-    # Method 1: Check if it's USB connected
     is_usb = props.get('ID_BUS') == 'usb'
-
-    # Method 2: Check for USB in device path
     device_path = device.device_path or ''
     has_usb_in_path = '/usb' in device_path
-
-    # Method 3: Check for storage-related subsystems
     is_block_device = device.subsystem == 'block'
-
-    # Method 4: Check device type (should be disk for storage devices)
     device_type = props.get('DEVTYPE', '')
     is_disk = device_type == 'disk'
 
-    # Debug information
     if is_usb or has_usb_in_path:
         print(f"[DEBUG] Device: {device.device_node}")
         print(f"[DEBUG] USB Bus: {is_usb}")
@@ -49,11 +39,15 @@ def is_usb_storage_device(device):
 
     return (is_usb or has_usb_in_path) and is_block_device and is_disk
 
+def device_detected_callback(info):
+    print(f"-> Triggering scan for device {info['device_node']}...")
+    report = scan_device(info['device_node'])
+    display_report(report)
 
 def monitor_usb_events(callback):
     context = pyudev.Context()
     monitor = pyudev.Monitor.from_netlink(context)
-    monitor.filter_by('block')  # Only listen for block devices (e.g., USBs, HDDs)
+    monitor.filter_by('block')
 
     print("[USB Guardian] Listening for USB devices...")
     print("[DEBUG] Monitoring block device events...")
@@ -73,13 +67,6 @@ def monitor_usb_events(callback):
                 callback(info)
             else:
                 print(f"[DEBUG] Device {device.device_node} is not a USB storage device")
-
-
-# Example callback function to trigger scanner
-def device_detected_callback(info):
-    print(f"-> Triggering scan for device {info['device_node']}...")
-    print("    (This will be the scanner step)")
-
 
 if __name__ == "__main__":
     try:
