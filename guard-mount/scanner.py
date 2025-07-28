@@ -1,33 +1,57 @@
 import os
 import subprocess
+import pyudev
 import hashlib
 
-# CONFIG
 MOUNT_DIR = "/mnt/usb_guardian"
 SUSPICIOUS_EXTENSIONS = [".exe", ".bat", ".cmd", ".vbs", ".sh", ".ps1", ".scr", ".jar", ".docm"]
 AUTORUN_FILE = "autorun.inf"
 ENTROPY_THRESHOLD = 7.5  # High entropy indicates possible binary payloads
 
+def get_first_partition(device_node):
+    context = pyudev.Context()
+    device = pyudev.Device.from_device_file(context, device_node)
+    for child in device.children:
+        if child.device_type == 'partition':
+            return child.device_node
+    return None
+
+def get_mount_point(device_node):
+    result = subprocess.run(['lsblk', '-no', 'MOUNTPOINT', device_node], capture_output=True, text=True)
+    mountpoint = result.stdout.strip()
+    return mountpoint if mountpoint else None
+
 def mount_device(device_node):
+    existing_mount = get_mount_point(device_node)
+    if existing_mount:
+        print(f"[+] Device is already mounted at {existing_mount}")
+        return existing_mount  # Return existing mount path
+
+    partition = get_first_partition(device_node)
+    if not partition:
+        print("[ERROR] No partitions found on device.")
+        return None
+
     if not os.path.exists(MOUNT_DIR):
         os.makedirs(MOUNT_DIR)
 
-    print(f"[+] Mounting {device_node} to {MOUNT_DIR} as read-only...")
+    print(f"[+] Mounting {partition} to {MOUNT_DIR} as read-only...")
     try:
-        subprocess.run(["mount", "-o", "ro", device_node, MOUNT_DIR], check=True)
+        subprocess.run(["mount", "-o", "ro", partition, MOUNT_DIR], check=True)
         print("[+] Mounted successfully.")
-        return True
+        return MOUNT_DIR
     except subprocess.CalledProcessError:
-        print("[ERROR] Failed to mount device.")
-        return False
+        print("[ERROR] Failed to mount partition.")
+        return None
+
 
 def unmount_device():
     print(f"[+] Unmounting {MOUNT_DIR}...")
     subprocess.run(["umount", MOUNT_DIR], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-def clamav_scan():
+def clamav_scan(mount_path):
     print("[+] Starting ClamAV scan...")
-    result = subprocess.run(["clamscan", "-r", "--no-summary", MOUNT_DIR], capture_output=True, text=True)
+    result = subprocess.run(["clamscan", "-r", "--no-summary", mount_path], capture_output=True, text=True)
     malicious_files = []
     for line in result.stdout.strip().split("\n"):
         if "FOUND" in line:
@@ -54,20 +78,16 @@ def heuristic_scan():
             total_files += 1
             file_path = os.path.join(root, file)
 
-            # Detect autorun.inf
             if file.lower() == AUTORUN_FILE:
                 autorun_detected = True
                 suspicious_files.append({'path': file_path, 'reason': 'Autorun Script'})
 
-            # Suspicious extensions
             if any(file.lower().endswith(ext) for ext in SUSPICIOUS_EXTENSIONS):
                 suspicious_files.append({'path': file_path, 'reason': 'Suspicious File Extension'})
 
-            # Hidden files or payloads
             if file.startswith('.'):
                 suspicious_files.append({'path': file_path, 'reason': 'Hidden File'})
 
-            # High entropy binaries
             try:
                 entropy = calculate_entropy(file_path)
                 if entropy >= ENTROPY_THRESHOLD:
@@ -85,25 +105,19 @@ def scan_device(device_node):
         "clean_count": 0
     }
 
-    if not mount_device(device_node):
+    mount_path = mount_device(device_node)
+    if not mount_path:
         return scan_summary
 
     try:
-        # ClamAV Scan
-        scan_summary["malicious"] = clamav_scan()
-
-        # Heuristics
-        suspicious_files, total_files, autorun_detected = heuristic_scan()
+        scan_summary["malicious"] = clamav_scan(mount_path)
+        suspicious_files, total_files, autorun_detected = heuristic_scan(mount_path)
         scan_summary["suspicious"] = suspicious_files
         scan_summary["clean_count"] = total_files - len(scan_summary["malicious"]) - len(scan_summary["suspicious"])
 
     finally:
-        unmount_device()
+        if mount_path == MOUNT_DIR:  # Only unmount if WE mounted it.
+            unmount_device()
 
     return scan_summary
 
-if __name__ == "__main__":
-    # Example Test Run
-    device_node = "/dev/sdb1"  # Replace this with actual device node for testing
-    report = scan_device(device_node)
-    print(report)
