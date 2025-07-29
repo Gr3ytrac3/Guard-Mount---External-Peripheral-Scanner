@@ -15,7 +15,7 @@
 
 ---
 
-## What is GuardMount?
+## 🔍 What is GuardMount?
 
 **GuardMount** is a next-generation Linux security tool that intercepts all external peripheral devices (USBs, HDDs, BadUSB devices) **at the kernel level before they can mount**, scans their content for malicious payloads, and **requires explicit user authorization to proceed**.
 
@@ -23,7 +23,7 @@ Unlike traditional USB scanners that react **after** the device mounts, **GuardM
 
 ---
 
-## Why Pre-Mount Interception Matters
+## 🚫 Why Pre-Mount Interception Matters
 
 Modern attack vectors (BadUSB, Rubber Ducky payloads, autorun scripts) can exploit devices **the moment they are mounted**. A fraction of a second is enough to:
 
@@ -39,7 +39,7 @@ GuardMount stops this by:
 
 ---
 
-## Core Features
+## 🔐 Core Features
 
 ✅ **Kernel-Level Device Interception (UDEV Rule Integration)**
 
@@ -59,7 +59,7 @@ GuardMount stops this by:
 
 ---
 
-## Example Terminal Flow
+## 🖥️ Example Terminal Flow
 
 ```
 ───────────────────────────────────────────────────────────────────────
@@ -129,7 +129,7 @@ cd guard-mount
 pip install -r requirements.txt
 ```
 
-### UDEV Lockdown Setup
+### ⚡ UDEV Lockdown Setup
 
 ```bash
 # Copy GuardMount's UDEV rule to block automount for USB storage
@@ -142,7 +142,7 @@ sudo udevadm trigger
 
 ---
 
-## Running GuardMount
+## ▶️ Running GuardMount
 
 ```bash
 sudo python3 guard-mount/main.py
@@ -152,7 +152,7 @@ GuardMount will now control all external storage devices — detecting, scanning
 
 ---
 
-## Optional: Install as a Systemd Daemon
+## ⚙️ Optional: Install as a Systemd Daemon
 
 ```bash
 # Copy service file
@@ -196,7 +196,7 @@ GuardMount - External Peripheral Scanner/
 
 ---
 
-## Future Enhancements
+## 🚀 Future Enhancements
 
 * Kernel Threat Simulator Mode
 * USB Firmware Analyzer
@@ -206,7 +206,7 @@ GuardMount - External Peripheral Scanner/
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 Pull Requests, Feedback, and Feature Suggestions are welcome. Join in refining a tool that can redefine how Linux handles USB security.
 
@@ -215,14 +215,14 @@ Pull Requests, Feedback, and Feature Suggestions are welcome. Join in refining a
 ## Author
 
 **RedKernel**
-Offensive Security Artisan & Kernel Security Engineer
+💻 Offensive Security Artisan & Kernel Security Engineer
 
 > “Devices don’t earn trust by being plugged in. They earn trust by surviving scrutiny.”
 > — *GuardMount Sentinel Philosophy*
 
 ---
 
-## Disclaimer
+## 🧱 Disclaimer
 
 GuardMount is designed for educational and professional security purposes. Unauthorized usage on systems you don’t own or have permission to protect is prohibited.
 
