@@ -5,7 +5,7 @@ import time
 import os
 from scanner import scan_device
 from reporter import display_report
-from isolator import authorize_usb_device, resolve_sysfs_usb_path
+from isolator import isolate_device, authorize_device
 
 
 def get_device_info(device):
@@ -33,7 +33,7 @@ def is_usb_storage_device(device):
     has_usb_in_path = '/usb' in device_path
     is_block_device = device.subsystem == 'block'
     device_type = props.get('DEVTYPE', '')
-    is_disk = device_type == 'disk'
+    is_partition = device_type == 'partition'  # <-- Add this
 
     if is_usb or has_usb_in_path:
         print(f"[DEBUG] Device: {device.device_node}")
@@ -43,17 +43,9 @@ def is_usb_storage_device(device):
         print(f"[DEBUG] Device type: {device_type}")
         print(f"[DEBUG] Subsystem: {device.subsystem}")
 
-    return (is_usb or has_usb_in_path) and is_block_device and is_disk
+    # Only trigger handling for partitions now!
+    return (is_usb or has_usb_in_path) and is_block_device and is_partition
 
-
-def wait_for_device_node(device_node, timeout=5):
-    for _ in range(timeout * 10):
-        if os.path.exists(device_node):
-            print(f"[+] Device node {device_node} is now available.")
-            return True
-        time.sleep(0.1)
-    print(f"[ERROR] Device node {device_node} did not appear after authorization.")
-    return False
 
 
 def handle_new_device(device):
@@ -67,19 +59,24 @@ def handle_new_device(device):
     print(f"    Serial: {info['serial']}")
     print(f"    Bus: {info['bus']}")
 
-    sysfs_path = resolve_sysfs_usb_path(device_node)
-    if not sysfs_path:
-        print("[ERROR] Could not resolve sysfs path. Device will remain blocked.")
-        return
+    # Step 1: Force Unmount Immediately
+    isolate_device(device_node)
 
-    authorize_usb_device(sysfs_path)
+    # Step 2: Proceed with Offline Scan
+    print(f"[+] Proceeding with scan for {device_node} (offline)...")
+    report = scan_device(device_node)
+    user_action = display_report(report)
 
-    if wait_for_device_node(device_node):
-        print(f"[+] Proceeding with scan for {device_node}...")
-        report = scan_device(device_node)
-        display_report(report)
+    # Step 3: If allowed, Remount Device
+    if user_action == "1":
+        authorize_device(device_node)
+    elif user_action == "2":
+        print("[+] Cleaning malicious files (placeholder action)...")
+        authorize_device(device_node)
+    elif user_action == "3":
+        print("[+] Device remains quarantined and unmounted.")
     else:
-        print("[ERROR] Device node missing after authorization. Aborting scan.")
+        print("[+] No valid action selected, device remains isolated.")
 
 
 def monitor_usb_events():
