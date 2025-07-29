@@ -1,7 +1,12 @@
+# detector.py
+
 import pyudev
-import subprocess
+import time
+import os
 from scanner import scan_device
 from reporter import display_report
+from isolator import authorize_usb_device, resolve_sysfs_usb_path
+
 
 def get_device_info(device):
     props = device.properties
@@ -18,6 +23,7 @@ def get_device_info(device):
         'serial': serial,
         'bus': bus
     }
+
 
 def is_usb_storage_device(device):
     props = device.properties
@@ -39,12 +45,44 @@ def is_usb_storage_device(device):
 
     return (is_usb or has_usb_in_path) and is_block_device and is_disk
 
-def device_detected_callback(info):
-    print(f"-> Triggering scan for device {info['device_node']}...")
-    report = scan_device(info['device_node'])
-    display_report(report)
 
-def monitor_usb_events(callback):
+def wait_for_device_node(device_node, timeout=5):
+    for _ in range(timeout * 10):
+        if os.path.exists(device_node):
+            print(f"[+] Device node {device_node} is now available.")
+            return True
+        time.sleep(0.1)
+    print(f"[ERROR] Device node {device_node} did not appear after authorization.")
+    return False
+
+
+def handle_new_device(device):
+    info = get_device_info(device)
+    device_node = info['device_node']
+
+    print(f"\n[!] Detected New USB Storage Device:")
+    print(f"    Vendor: {info['vendor']}")
+    print(f"    Model: {info['model']}")
+    print(f"    Device: {info['device_node']}")
+    print(f"    Serial: {info['serial']}")
+    print(f"    Bus: {info['bus']}")
+
+    sysfs_path = resolve_sysfs_usb_path(device_node)
+    if not sysfs_path:
+        print("[ERROR] Could not resolve sysfs path. Device will remain blocked.")
+        return
+
+    authorize_usb_device(sysfs_path)
+
+    if wait_for_device_node(device_node):
+        print(f"[+] Proceeding with scan for {device_node}...")
+        report = scan_device(device_node)
+        display_report(report)
+    else:
+        print("[ERROR] Device node missing after authorization. Aborting scan.")
+
+
+def monitor_usb_events():
     context = pyudev.Context()
     monitor = pyudev.Monitor.from_netlink(context)
     monitor.filter_by('block')
@@ -57,20 +95,14 @@ def monitor_usb_events(callback):
 
         if device.action == 'add':
             if is_usb_storage_device(device):
-                info = get_device_info(device)
-                print(f"\n[!] Detected New USB Storage Device:")
-                print(f"    Vendor: {info['vendor']}")
-                print(f"    Model: {info['model']}")
-                print(f"    Device: {info['device_node']}")
-                print(f"    Serial: {info['serial']}")
-                print(f"    Bus: {info['bus']}")
-                callback(info)
+                handle_new_device(device)
             else:
                 print(f"[DEBUG] Device {device.device_node} is not a USB storage device")
 
+
 if __name__ == "__main__":
     try:
-        monitor_usb_events(device_detected_callback)
+        monitor_usb_events()
     except KeyboardInterrupt:
         print("\n[USB Guardian] Monitoring stopped.")
     except Exception as e:
