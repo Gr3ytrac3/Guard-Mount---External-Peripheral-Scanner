@@ -1,8 +1,7 @@
 # isolator.py
 
-import subprocess
 import os
-import time
+import subprocess
 
 
 def authorize_usb_device(usb_device_path):
@@ -25,9 +24,6 @@ def authorize_usb_device(usb_device_path):
 
 
 def mount_device(device_node, mount_point, read_only=True):
-    """
-    Mounts a device to the specified mount point with read-only option.
-    """
     os.makedirs(mount_point, exist_ok=True)
 
     mount_options = "ro" if read_only else "rw"
@@ -45,9 +41,6 @@ def mount_device(device_node, mount_point, read_only=True):
 
 
 def unmount_device(mount_point):
-    """
-    Unmounts a mounted device.
-    """
     print(f"[-] Unmounting {mount_point}...")
     try:
         subprocess.run(["umount", mount_point], check=True)
@@ -59,9 +52,6 @@ def unmount_device(mount_point):
 
 
 def eject_device(device_node):
-    """
-    Safely ejects the device.
-    """
     print(f"[-] Ejecting {device_node}...")
     try:
         subprocess.run(["udisksctl", "power-off", "-b", device_node], check=True)
@@ -71,11 +61,32 @@ def eject_device(device_node):
 
 
 def is_device_mounted(device_node):
-    """
-    Checks if the device is already mounted.
-    """
     result = subprocess.run(["lsblk", "-no", "MOUNTPOINT", device_node], capture_output=True, text=True)
     return result.stdout.strip() != ""
+
+
+def resolve_sysfs_usb_path(device_node):
+    """
+    Maps a /dev/sdX node to its corresponding /sys/bus/usb/devices/usbX path.
+    """
+    try:
+        real_path = os.path.realpath(device_node)
+        sys_block_path = real_path.replace('/dev/', '/sys/class/block/')
+
+        # Walk up the device chain to find usb device
+        current = sys_block_path
+        for _ in range(5):  # Max depth to walk up
+            parent = os.path.dirname(current)
+            if 'usb' in parent:
+                print(f"[DEBUG] Resolved USB sysfs path: {parent}")
+                return parent
+            current = parent
+        print("[ERROR] USB sysfs path could not be resolved.")
+        return None
+
+    except Exception as e:
+        print(f"[ERROR] Exception in resolving sysfs path: {e}")
+        return None
 
 
 if __name__ == "__main__":
