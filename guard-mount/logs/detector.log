@@ -1,3 +1,11 @@
 2025-07-29 14:29:50,940 - INFO - Loaded 0 whitelisted and 0 blacklisted devices
 2025-07-29 14:29:50,941 - INFO - 🛡️  GuardMount USB Detector - Kernel-Level Monitoring Active
 2025-07-29 14:29:50,941 - INFO - Listening for external storage devices...
+2025-07-29 14:35:02,243 - INFO - GuardMount detector stopped by user
+2025-07-29 14:35:27,358 - INFO - GuardMount detector initialized - monitoring block devices
+2025-07-29 14:35:56,793 - INFO - GuardMount detector stopped by user
+2025-07-29 14:36:14,888 - INFO - GuardMount detector initialized - monitoring block devices
+2025-07-29 14:36:37,203 - INFO - GuardMount detector stopped by user
+2025-07-29 14:36:43,739 - INFO - GuardMount detector initialized - monitoring block devices
+2025-07-29 14:36:55,009 - INFO - GuardMount detector stopped by user
+2025-07-29 14:37:18,967 - INFO - GuardMount detector initialized - monitoring block devices
