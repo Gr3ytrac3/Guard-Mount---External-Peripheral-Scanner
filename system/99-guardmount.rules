@@ -1,0 +1,6 @@
+# Block Auto-Mounting of All USB Storage Devices
+ACTION=="add", SUBSYSTEMS=="usb", KERNEL=="sd*", ENV{UDISKS_IGNORE}="1"
+ACTION=="add", SUBSYSTEMS=="usb", ENV{DEVTYPE}=="usb_device", ATTR{authorized}="0"
+
+# Notify GuardMount of USB insertion events
+ACTION=="add", SUBSYSTEM=="block", ENV{ID_USB_DRIVER}=="usb-storage", RUN+="/usr/bin/logger -t GuardMount 'USB device detected: %k'"
