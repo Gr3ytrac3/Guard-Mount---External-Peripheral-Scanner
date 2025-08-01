@@ -8,10 +8,10 @@
     ║    ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝   ╚═╝      ║
     ║                                                                                                ║
     ║                                                                                                ║
-    ║                              Author: RedKernel                                                 ║
-    ║                     "Devices don't earn trust by being                                         ║
-    ║                      plugged in. They earn trust by                                            ║
-    ║                         surviving scrutiny."                                                   ║
+    ║                                    Author: RedKernel                                           ║
+    ║                            "Devices don't earn trust by being                                  ║
+    ║                              plugged in. They earn trust by                                    ║
+    ║                                 surviving scrutiny."                                           ║
     ║                                                                                                ║
     ╚════════════════════════════════════════════════════════════════════════════════════════════════╝
 
