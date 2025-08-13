@@ -3,7 +3,7 @@
 ![Process Diagram](https://github.com/Gr3ytrac3/Guard-Mount---External-Peripheral-Scanner/blob/b5dbbb53f08e5192246df2ff8e7643b0ae4676ab/guard-mount.png)
 
 <h1 align="center">
-  🛡️ GuardMount
+  🛡️ GuardMount (Building Phase)
 </h1>
 <h4 align="center">
   Kernel-Level External Device Interception & Threat Gatekeeper for Linux
