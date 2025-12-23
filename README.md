@@ -138,6 +138,6 @@ It should be reviewed, tested, and adapted before use in production environments
 
 ## Author
 
-**RedKernel**
+**Cyberdev**
 Offensive Security • Linux Internals • Kernel-Adjacent Engineering
 
